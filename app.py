@@ -1,5 +1,4 @@
 # app.py
-
 import streamlit as st
 import pandas as pd
 import joblib
@@ -7,20 +6,13 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from utils import preprocess_years_in_job
 
-# Define the preprocessing function
-def preprocess_years_in_job(X):
-    X = X.copy()
-    # Check and convert to string type if necessary
-    if X['Years in current job'].dtype != 'object':
-        X['Years in current job'] = X['Years in current job'].astype(str)
-    # Handle possible NaN values
-    X['Years in current job'] = X['Years in current job'].fillna('')
-    X['Years in current job'] = X['Years in current job'].str.extract(r'(\d+)').astype(float)
-    return X
 
-# Load the saved model
+# Load the saved model pipeline
 model_path = r"C:\Users\DELL\Desktop\Loan_Default_Predection\ML_MODEL\knn_model.pkl"
-model = joblib.load(model_path)
+pipeline = joblib.load(model_path)
+
+# Print the named steps to find the preprocessing step name
+print(pipeline.named_steps)
 
 # Define feature names
 num_features = [
@@ -92,45 +84,42 @@ def main():
     # Preprocess the input data
     input_data = preprocess_years_in_job(input_data)
 
-    # Ensure all required columns are present and in the correct order
-    for col in categorical_columns:
-        if col not in input_data.columns:
-            input_data[col] = ""
+    # Handle categorical features
+    input_data_encoded = pd.get_dummies(input_data, columns=categorical_columns)
 
-    # Ensure the columns are in the correct order
-    input_data = input_data[num_features + categorical_columns]
+    # Retrieve the feature names from the pipeline's preprocessor
+    feature_names = pipeline.named_steps['scaler'].get_feature_names_out()
 
+    # Ensure the input data has the same columns as the model was trained on
+    input_data_encoded = input_data_encoded.reindex(columns=feature_names, fill_value=0)
+
+    # Scale the input data using the scaler from the pipeline
+    input_data_scaled = pipeline.named_steps['scaler'].transform(input_data_encoded)
+
+    # Make prediction
+    classifier = pipeline.named_steps['classifier']
+    prediction = classifier.predict(input_data_scaled)
+    probability = classifier.predict_proba(input_data_scaled)[0][1]
+    
     # Prediction and results section
     with col2:
         st.subheader('Prediction')
         if st.button('Predict'):
-            # Transform input data
-            input_data_transformed = model.named_steps['preprocessor'].transform(input_data)
-            input_data_df = pd.DataFrame(input_data_transformed, columns=model.named_steps['preprocessor'].get_feature_names_out())
-
-            # Make prediction
-            prediction = model.named_steps['classifier'].predict(input_data_df)
-            probability = model.named_steps['classifier'].predict_proba(input_data_df)[0][1]
-            
             st.write(f'Prediction: {"Will Default" if prediction[0] == 1 else "Will Not Default"}')
             st.write(f'Probability of Default: {probability:.2f}')
 
             # Plotting
             fig, axes = plt.subplots(1, 2, figsize=(12, 6))
 
-            # Plot Pass/Fail probability
             sns.barplot(x=['Will Not Default', 'Will Default'], y=[1 - probability, probability], ax=axes[0], palette=['green', 'red'])
             axes[0].set_title('Loan Default Probability')
             axes[0].set_ylabel('Probability')
 
-            # Plot Credit Score distribution
             sns.histplot(input_data['Credit Score'], kde=True, ax=axes[1])
             axes[1].set_title('Credit Score Distribution')
 
-            # Display the plots
             st.pyplot(fig)
 
-            # Provide recommendations
             if prediction[0] == 1:
                 st.error("This customer is likely to default on the loan. Consider further evaluation.")
             else:
@@ -138,4 +127,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
