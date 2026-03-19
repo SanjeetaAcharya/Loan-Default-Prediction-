@@ -1,5 +1,5 @@
 def main():
-    st.title('🏦 Loan Default Prediction')
+    st.title('Loan Default Prediction')
     selected_model = st.selectbox("Choose ML Model", list(model_options.keys()))
     pipeline = joblib.load(model_options[selected_model])
 
