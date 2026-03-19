@@ -139,12 +139,12 @@ if st.button('🎲 Fill with Sample Data'):
 
             st.pyplot(fig)
 
-            if prediction[0] == 1:
-    st.error("⚠️ HIGH RISK — This customer is likely to default on the loan.")
-    st.metric(label="Default Probability", value=f"{probability:.1%}", delta="High Risk", delta_color="inverse")
-else:
-    st.success("✅ LOW RISK — This customer is not likely to default on the loan.")
-    st.metric(label="Default Probability", value=f"{probability:.1%}", delta="Low Risk", delta_color="normal")
+           if prediction[0] == 1:
+                st.error("⚠️ HIGH RISK — This customer is likely to default on the loan.")
+                st.metric(label="Default Probability", value=f"{probability:.1%}", delta="High Risk", delta_color="inverse")
+            else:
+                st.success("✅ LOW RISK — This customer is not likely to default on the loan.")
+                st.metric(label="Default Probability", value=f"{probability:.1%}", delta="Low Risk", delta_color="normal")
 
 if __name__ == '__main__':
     main()
