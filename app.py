@@ -1,4 +1,3 @@
-# app.py
 import streamlit as st
 import pandas as pd
 import joblib
@@ -6,8 +5,6 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from utils import preprocess_years_in_job
 
-
-# Load the saved model pipeline
 model_options = {
     "KNN": "ML_MODEL/knn_model.pkl",
     "Decision Tree": "ML_MODEL/decision_tree_model.pkl",
@@ -16,46 +13,41 @@ model_options = {
     "Random Forest": "ML_MODEL/random_forest_model.pkl"
 }
 
-
-# Define feature names
 num_features = [
-    'Annual Income', 'Years in current job', 'Tax Liens', 'Number of Open Accounts', 
-    'Years of Credit History', 'Maximum Open Credit', 'Number of Credit Problems', 
-    'Months since last delinquent', 'Bankruptcies', 'Current Loan Amount', 
+    'Annual Income', 'Years in current job', 'Tax Liens', 'Number of Open Accounts',
+    'Years of Credit History', 'Maximum Open Credit', 'Number of Credit Problems',
+    'Months since last delinquent', 'Bankruptcies', 'Current Loan Amount',
     'Current Credit Balance', 'Monthly Debt', 'Credit Score'
 ]
 categorical_columns = ['Home Ownership', 'Purpose', 'Term']
 
 def main():
-    # Set the title of the web app
     st.title('Loan Default Prediction')
     selected_model = st.selectbox("Choose ML Model", list(model_options.keys()))
-pipeline = joblib.load(model_options[selected_model])
+    pipeline = joblib.load(model_options[selected_model])
 
-    # Add a description
-st.write('Enter customer information to predict loan default.')
+    st.write('Enter customer information to predict loan default.')
 
-if st.button('🎲 Fill with Sample Data'):
-    st.session_state['annual_income'] = 500000
-    st.session_state['years_in_job'] = 5
-    st.session_state['tax_liens'] = 0
-    st.session_state['open_accounts'] = 10
-    st.session_state['credit_history'] = 15.0
-    st.session_state['max_credit'] = 300000
-    st.session_state['credit_problems'] = 0
-    st.session_state['months_delinquent'] = 0
-    st.session_state['bankruptcies'] = 0
-    st.session_state['loan_amount'] = 150000
-    st.session_state['credit_balance'] = 80000
-    st.session_state['monthly_debt'] = 5000
-    st.session_state['credit_score'] = 720
-    # Create columns for layout
+    if st.button('🎲 Fill with Sample Data'):
+        st.session_state['annual_income'] = 500000
+        st.session_state['years_in_job'] = 5
+        st.session_state['tax_liens'] = 0
+        st.session_state['open_accounts'] = 10
+        st.session_state['credit_history'] = 15.0
+        st.session_state['max_credit'] = 300000
+        st.session_state['credit_problems'] = 0
+        st.session_state['months_delinquent'] = 0
+        st.session_state['bankruptcies'] = 0
+        st.session_state['loan_amount'] = 150000
+        st.session_state['credit_balance'] = 80000
+        st.session_state['monthly_debt'] = 5000
+        st.session_state['credit_score'] = 720
+
     col1, col2 = st.columns([2, 1])
-    
+
     with col1:
         st.subheader('Customer Information')
 
-        # Add input fields for numerical features
         annual_income = st.number_input('Annual Income', min_value=0)
         years_in_current_job = st.slider('Years in Current Job', 0, 30, 5)
         tax_liens = st.slider('Tax Liens', 0, 10, 0)
@@ -70,17 +62,15 @@ if st.button('🎲 Fill with Sample Data'):
         monthly_debt = st.number_input('Monthly Debt', min_value=0)
         credit_score = st.slider('Credit Score', 0, 1000, 500)
 
-        # Add input fields for categorical features
         home_ownership = st.selectbox('Home Ownership', ['Have Mortgage', 'Home Mortgage', 'Own Home', 'Rent'])
         purpose = st.selectbox('Purpose', [
             'business loan', 'buy a car', 'buy house', 'debt consolidation',
-            'educational expenses', 'home improvements', 'major purchase', 
-            'medical bills', 'moving', 'other', 'small business', 
+            'educational expenses', 'home improvements', 'major purchase',
+            'medical bills', 'moving', 'other', 'small business',
             'take a trip', 'vacation', 'wedding'
         ])
         term = st.selectbox('Term', ['Short Term', 'Long Term'])
 
-    # Prepare input data as a DataFrame
     input_data = pd.DataFrame({
         'Annual Income': [annual_income],
         'Years in current job': [years_in_current_job],
@@ -100,34 +90,19 @@ if st.button('🎲 Fill with Sample Data'):
         'Credit Score': [credit_score]
     })
 
-    # Preprocess the input data
     input_data = preprocess_years_in_job(input_data)
-
-    # Handle categorical features
     input_data_encoded = pd.get_dummies(input_data, columns=categorical_columns)
-
-    # Retrieve the feature names from the pipeline's preprocessor
     feature_names = pipeline.named_steps['scaler'].get_feature_names_out()
-
-    # Ensure the input data has the same columns as the model was trained on
     input_data_encoded = input_data_encoded.reindex(columns=feature_names, fill_value=0)
-
-    # Scale the input data using the scaler from the pipeline
     input_data_scaled = pipeline.named_steps['scaler'].transform(input_data_encoded)
 
-    # Make prediction
     classifier = pipeline.named_steps['classifier']
     prediction = classifier.predict(input_data_scaled)
     probability = classifier.predict_proba(input_data_scaled)[0][1]
-    
-    # Prediction and results section
+
     with col2:
         st.subheader('Prediction')
         if st.button('Predict'):
-            st.write(f'Prediction: {"Will Default" if prediction[0] == 1 else "Will Not Default"}')
-            st.write(f'Probability of Default: {probability:.2f}')
-
-            # Plotting
             fig, axes = plt.subplots(1, 2, figsize=(12, 6))
 
             sns.barplot(x=['Will Not Default', 'Will Default'], y=[1 - probability, probability], ax=axes[0], palette=['green', 'red'])
@@ -139,7 +114,7 @@ if st.button('🎲 Fill with Sample Data'):
 
             st.pyplot(fig)
 
-           if prediction[0] == 1:
+            if prediction[0] == 1:
                 st.error("⚠️ HIGH RISK — This customer is likely to default on the loan.")
                 st.metric(label="Default Probability", value=f"{probability:.1%}", delta="High Risk", delta_color="inverse")
             else:
