@@ -11,8 +11,6 @@ from utils import preprocess_years_in_job
 model_path = "ML_MODEL/knn_model.pkl"
 pipeline = joblib.load(model_path)
 
-# Print the named steps to find the preprocessing step name
-print(pipeline.named_steps)
 
 # Define feature names
 num_features = [
