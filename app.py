@@ -1,5 +1,28 @@
+import streamlit as st
+import pandas as pd
+import joblib
+import matplotlib.pyplot as plt
+import seaborn as sns
+from utils import preprocess_years_in_job
+
+model_options = {
+    "KNN": "ML_MODEL/knn_model.pkl",
+    "Decision Tree": "ML_MODEL/decision_tree_model.pkl",
+    "Logistic Regression": "ML_MODEL/logistic_regression_model.pkl",
+    "Naive Bayes": "ML_MODEL/naive_bayes_model.pkl",
+    "Random Forest": "ML_MODEL/random_forest_model.pkl"
+}
+
+num_features = [
+    'Annual Income', 'Years in current job', 'Tax Liens', 'Number of Open Accounts',
+    'Years of Credit History', 'Maximum Open Credit', 'Number of Credit Problems',
+    'Months since last delinquent', 'Bankruptcies', 'Current Loan Amount',
+    'Current Credit Balance', 'Monthly Debt', 'Credit Score'
+]
+categorical_columns = ['Home Ownership', 'Purpose', 'Term']
+
 def main():
-    st.title('Loan Default Prediction')
+    st.title('🏦 Loan Default Prediction')
     selected_model = st.selectbox("Choose ML Model", list(model_options.keys()))
     pipeline = joblib.load(model_options[selected_model])
 
