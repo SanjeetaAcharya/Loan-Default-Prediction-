@@ -8,8 +8,13 @@ from utils import preprocess_years_in_job
 
 
 # Load the saved model pipeline
-model_path = "ML_MODEL/knn_model.pkl"
-pipeline = joblib.load(model_path)
+model_options = {
+    "KNN": "ML_MODEL/knn_model.pkl",
+    "Decision Tree": "ML_MODEL/decision_tree_model.pkl",
+    "Logistic Regression": "ML_MODEL/logistic_regression_model.pkl",
+    "Naive Bayes": "ML_MODEL/naive_bayes_model.pkl",
+    "Random Forest": "ML_MODEL/random_forest_model.pkl"
+}
 
 
 # Define feature names
@@ -24,6 +29,8 @@ categorical_columns = ['Home Ownership', 'Purpose', 'Term']
 def main():
     # Set the title of the web app
     st.title('Loan Default Prediction')
+    selected_model = st.selectbox("Choose ML Model", list(model_options.keys()))
+pipeline = joblib.load(model_options[selected_model])
 
     # Add a description
     st.write('Enter customer information to predict loan default.')
