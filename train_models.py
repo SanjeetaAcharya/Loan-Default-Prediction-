@@ -40,8 +40,18 @@ def calculate_default(row):
 data['Default'] = data.apply(calculate_default, axis=1)
 print(f"Default distribution:\n{data['Default'].value_counts()}")
 
-# ── 4. Features and target ───────────────────────────────────
-features = data.drop(columns=['Id', 'Default'], errors='ignore')
+# ── 4. Keep only important features ─────────────────────────
+features = data[[
+    'Credit Score',
+    'Annual Income', 
+    'Monthly Debt',
+    'Tax Liens',
+    'Bankruptcies',
+    'Number of Credit Problems',
+    'Home Ownership',
+    'Purpose',
+    'Term'
+]]
 target = data['Default']
 
 # ── 5. One-hot encode categorical columns ────────────────────
