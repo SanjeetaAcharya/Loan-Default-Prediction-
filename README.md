@@ -3,7 +3,8 @@
 
 A machine learning web application that predicts whether a loan applicant is likely to default, built with Python and Streamlit.
 
-
+## live demo:
+https://loan-default-sanjeeta.streamlit.app/
 
 ## 📌 Features
 - Predicts loan default risk from applicant financial data
