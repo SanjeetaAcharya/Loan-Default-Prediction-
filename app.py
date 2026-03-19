@@ -33,8 +33,22 @@ def main():
 pipeline = joblib.load(model_options[selected_model])
 
     # Add a description
-    st.write('Enter customer information to predict loan default.')
+st.write('Enter customer information to predict loan default.')
 
+if st.button('🎲 Fill with Sample Data'):
+    st.session_state['annual_income'] = 500000
+    st.session_state['years_in_job'] = 5
+    st.session_state['tax_liens'] = 0
+    st.session_state['open_accounts'] = 10
+    st.session_state['credit_history'] = 15.0
+    st.session_state['max_credit'] = 300000
+    st.session_state['credit_problems'] = 0
+    st.session_state['months_delinquent'] = 0
+    st.session_state['bankruptcies'] = 0
+    st.session_state['loan_amount'] = 150000
+    st.session_state['credit_balance'] = 80000
+    st.session_state['monthly_debt'] = 5000
+    st.session_state['credit_score'] = 720
     # Create columns for layout
     col1, col2 = st.columns([2, 1])
     
@@ -126,9 +140,11 @@ pipeline = joblib.load(model_options[selected_model])
             st.pyplot(fig)
 
             if prediction[0] == 1:
-                st.error("This customer is likely to default on the loan. Consider further evaluation.")
-            else:
-                st.success("This customer is not likely to default on the loan. Proceed accordingly.")
+    st.error("⚠️ HIGH RISK — This customer is likely to default on the loan.")
+    st.metric(label="Default Probability", value=f"{probability:.1%}", delta="High Risk", delta_color="inverse")
+else:
+    st.success("✅ LOW RISK — This customer is not likely to default on the loan.")
+    st.metric(label="Default Probability", value=f"{probability:.1%}", delta="Low Risk", delta_color="normal")
 
 if __name__ == '__main__':
     main()
