@@ -8,7 +8,7 @@ from utils import preprocess_years_in_job
 
 
 # Load the saved model pipeline
-model_path = r"C:\Users\DELL\Desktop\Loan_Default_Predection\ML_MODEL\knn_model.pkl"
+model_path = "ML_MODEL/knn_model.pkl"
 pipeline = joblib.load(model_path)
 
 # Print the named steps to find the preprocessing step name
